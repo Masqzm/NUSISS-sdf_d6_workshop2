@@ -14,8 +14,9 @@ public class ClientApp {
             System.exit(-1);
         }
         
+        Socket s = new Socket("localhost", Integer.parseInt(portNumber));
+        
         try {
-            Socket s = new Socket("localhost", Integer.parseInt(portNumber));
 
             InputStream is = s.getInputStream();
             BufferedInputStream bis = new BufferedInputStream(is);

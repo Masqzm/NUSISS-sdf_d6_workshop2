@@ -2,8 +2,10 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import client.Cookie;
+import client.Cookies;
 
 public class App {
     public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -28,51 +30,31 @@ public class App {
             newDirectory.mkdir();
         }
 
-        // Read and print cookies
-        Cookie c = new Cookie();
-        c.readCookieFile(dirPath + File.separator + fileName);
+        // Read cookies file
+        Cookies cookies = new Cookies();
+        cookies.readCookieFile(dirPath + File.separator + fileName);
         
         // Init server
         ServerSocket ss = new ServerSocket(Integer.parseInt(portNumber));
-        System.out.printf("Websocket server started on port %s. Waiting for connection...\n", portNumber);
-        Socket s = ss.accept();
+        
+        // Create a thread pool
+        ExecutorService thrPool = Executors.newFixedThreadPool(2);
+        String threadName = Thread.currentThread().getName();
 
-        try {
-            InputStream is = s.getInputStream();
-            BufferedInputStream bis = new BufferedInputStream(is);
-            DataInputStream dis = new DataInputStream(bis);
-            String msgReceived = "";
+        while(true) 
+        {
+            System.out.printf("[%s] Waiting for connection on port %s\n", threadName, portNumber);
 
-            OutputStream os = s.getOutputStream();
-            BufferedOutputStream bos = new BufferedOutputStream(os);
-            DataOutputStream dos = new DataOutputStream(bos);
+            // Waiting for incoming connection (listens to port for connection)
+            Socket sock = ss.accept();  
 
-            while(!msgReceived.toLowerCase().equals("quit")) 
-            {
-                System.out.println("Waiting for client input...");
-                
-                // Get client input
-                msgReceived = dis.readUTF();
+            System.out.println("Received new connection.");
 
-                // Serve random cookie
-                String retrievedCookie = c.getRandomCookie();
-                dos.writeUTF(retrievedCookie);
-                dos.flush();
-            } 
+            // Create a "worker" to handle work
+            CookieClientHandler cHandler = new CookieClientHandler(sock, cookies);
 
-            // Close io streams
-            dos.close();
-            bos.close();
-            os.close();
-            
-            dis.close();
-            bis.close();
-            is.close(); 
-
-            // Close socket
-            s.close(); 
-        } catch (EOFException ex) {
-            System.err.println(ex.toString());
-        } 
+            // Pass the work to the worker
+            thrPool.submit(cHandler);
+        }
     }
 }
