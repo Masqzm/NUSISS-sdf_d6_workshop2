@@ -58,8 +58,8 @@ public class ClientApp {
 
             // Close socket
             s.close();
-        } catch(Exception ex) {
-
+        } catch(IOException ex) {
+            System.err.println(ex.toString());
         }
     }
 }
