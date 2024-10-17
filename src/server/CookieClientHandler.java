@@ -3,8 +3,6 @@ package server;
 import java.io.*;
 import java.net.Socket;
 
-import client.Cookies;
-
 public class CookieClientHandler implements Runnable {
     private final Socket s;
     private final Cookies cookies;

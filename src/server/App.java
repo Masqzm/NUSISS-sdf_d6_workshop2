@@ -5,9 +5,8 @@ import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import client.Cookies;
-
 public class App {
+    // Run server cmd: java -cp classes server.App 3000 data cookie_file.txt
     public static void main(String[] args) throws FileNotFoundException, IOException {
         //int port = 12345;
         //String file = "cookie_file.txt";
